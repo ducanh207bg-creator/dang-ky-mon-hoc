@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="vi"><meta charset="utf-8"><title>Nhóm 2 · Đăng ký môn học</title>
+<style>
+body{margin:0;background:#e8eff7;font:24px system-ui;color:#172944}
+section{min-height:100vh;box-sizing:border-box;padding:12vh 12vw;display:grid;align-content:center;border-bottom:2px solid #a5b8cf}
+h1,h2{color:#174b8a;font-size:clamp(36px,6vw,76px);margin:0 0 .5em}li{margin:.7em 0}
+@media print{section{min-height:95vh;break-after:page}section:last-child{break-after:auto}}
+</style>
+<section><h1>Đăng ký môn học</h1><p>Đồ án Java hướng đối tượng · Nhóm 2</p><p>Giao diện Java Swing và web · SQLite</p></section>
+<section><h2>Chức năng</h2><ul><li>Xem và tìm môn theo mã hoặc tên</li><li>Đăng ký, hủy và xem các môn đã đăng ký</li><li>Theo dõi sĩ số và tổng tín chỉ</li></ul></section>
+<section><h2>Thiết kế</h2><p>Swing và web → máy chủ Java → JDBC → SQLite.</p><p>Student kế thừa User. RegistrationService dùng interface CourseValidator để kiểm tra sĩ số, giới hạn tín chỉ và lịch học.</p></section>
+<section><h2>Demo</h2><ol><li>Đăng ký IT101 bằng Swing và xem kết quả trên web.</li><li>Thử đăng ký IT102 cùng lịch và đọc thông báo lỗi.</li><li>Hủy IT101 trên web rồi cập nhật Swing.</li><li>Khởi động lại máy chủ để kiểm tra dữ liệu được lưu.</li></ol></section>
+<section><h2>Phân công</h2><ul><li>Mô hình và nghiệp vụ</li><li>Máy chủ và cơ sở dữ liệu</li><li>Giao diện Swing và web</li><li>Kiểm thử và thuyết trình</li></ul></section>
+</html>

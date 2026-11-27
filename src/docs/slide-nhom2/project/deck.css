@@ -1,0 +1,16 @@
+body { font-family: 'Be Vietnam Pro', Arial, sans-serif; }
+section { background: #F4F6FC; color: #1C2540; padding: 112px 128px; display: flex; flex-direction: column; gap: 40px; }
+section.dark { background: #223671; color: #F4F6FC; justify-content: center; }
+h1 { font-size: 88px; font-weight: 700; line-height: 1.15; }
+h2 { font-size: 56px; font-weight: 700; color: #223671; line-height: 1.2; }
+h3 { font-size: 36px; font-weight: 600; color: #223671; }
+p, li { font-size: 30px; line-height: 1.45; }
+.lead { font-size: 36px; }
+.dark .lead { color: #C9D3F5; }
+.row { display: flex; gap: 32px; }
+.card { flex: 1; background: #FDFDFF; border-radius: 16px; padding: 36px; display: flex; flex-direction: column; gap: 20px; }
+.box { background: #FDFDFF; border: 3px solid #223671; border-radius: 10px; padding: 14px 18px; display: flex; flex-direction: column; justify-content: center; gap: 4px; box-sizing: border-box; }
+.box h3 { font-size: 28px; text-align: center; }
+.box p { font-size: 24px; text-align: center; line-height: 1.35; }
+table { font-size: 28px; background: #FDFDFF; }
+.note { font-size: 24px; color: #4A5578; }
