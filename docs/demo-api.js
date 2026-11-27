@@ -5,7 +5,9 @@ const MAX_CREDITS = 18;
 // Mật khẩu công khai chỉ để demo, kiểm tra ngay trong trình duyệt nên không phải bảo mật thật
 const DEMO_PASSWORD = 'demo1234';
 
-const STUDENTS = { SV01: 'Sinh viên 01', SV02: 'Sinh viên 02', SV03: 'Sinh viên 03', SV04: 'Sinh viên 04' };
+const STUDENTS = {
+  SV01: 'Trần Văn Đức Anh', SV02: 'Nguyễn Văn Long', SV03: 'Nguyễn Tất Cương', SV04: 'Nguyễn Quang Minh'
+};
 
 // [mã, tên, tín chỉ, giảng viên, sĩ số tối đa, lịch, phòng]
 const COURSES = [
