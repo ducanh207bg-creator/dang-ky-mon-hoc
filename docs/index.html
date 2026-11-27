@@ -145,11 +145,14 @@
           <select id="student">
             <option>SV01</option><option>SV02</option><option>SV03</option><option>SV04</option>
           </select>
-          <input id="password" type="hidden">
+
+          <label for="password">Mật khẩu demo</label>
+          <input id="password" type="password" autocomplete="off" placeholder="Nhập mật khẩu demo" required>
+          <p class="footnote">Mật khẩu demo: <b>demo1234</b>. Đừng nhập mật khẩu thật của bạn.</p>
 
           <button>VÀO BẢN DEMO</button>
           <p class="message" id="loginMessage" role="alert"></p>
-          <p class="footnote">Bản demo đồ án sinh viên, không phải trang chính thức của trường nào. Trang này không cần mật khẩu.</p>
+          <p class="footnote">Bản demo đồ án sinh viên, không phải trang chính thức của trường nào.</p>
         </div>
       </div>
     </form>

@@ -4,7 +4,7 @@ A demo app where students log in, view courses, and register or drop them. It ha
 
 **Online demo:** https://ducanh207bg-creator.github.io/dang-ky-mon-hoc/
 
-The online demo (the `docs` folder) is a static copy of the web page. It has no password and no Java server. Its data stays in your own browser, so people don't share class sizes. To run the real app, follow the steps below.
+The online demo (the `docs` folder) is a static copy of the web page. It has no Java server. The login page shows the demo password, and it is only checked in your browser. Its data stays in your own browser, so people don't share class sizes. To run the real app, follow the steps below.
 
 ## Group members
 

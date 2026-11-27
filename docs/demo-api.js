@@ -2,6 +2,9 @@
 // Quy tắc đăng ký giống service/RegistrationService.java.
 const MAX_CREDITS = 18;
 
+// Mật khẩu công khai chỉ để demo, kiểm tra ngay trong trình duyệt nên không phải bảo mật thật
+const DEMO_PASSWORD = 'demo1234';
+
 const STUDENTS = { SV01: 'Sinh viên 01', SV02: 'Sinh viên 02', SV03: 'Sinh viên 03', SV04: 'Sinh viên 04' };
 
 // [mã, tên, tín chỉ, giảng viên, sĩ số tối đa, lịch, phòng]
@@ -54,7 +57,9 @@ function overlaps(a, b) {
 // Cùng tên và cách dùng với hàm gọi máy chủ trong bản thật
 async function api(url, body) {
   if (url === '/api/login') {
-    if (!STUDENTS[body.student]) throw new Error('Không tìm thấy sinh viên.');
+    if (!STUDENTS[body.student] || body.password !== DEMO_PASSWORD) {
+      throw new Error('Sai mã sinh viên hoặc mật khẩu.');
+    }
     return { token: body.student, name: STUDENTS[body.student] };
   }
   if (url === '/api/logout') return {};
