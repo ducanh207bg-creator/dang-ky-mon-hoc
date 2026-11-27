@@ -52,7 +52,7 @@
     .welcome { margin: 4px 0 2px; font-weight: bold; font-size: 14px; }
     .hint, .footnote { font-size: 11px; color: #4b5563; }
     .login-box label { display: block; margin: 14px 0 6px; text-align: left; font-size: 12px; font-weight: 600; color: #4b5563; }
-    .login-box input, .login-box select { width: 100%; padding: 7px 14px; border: 1px solid #dfe1e5; border-radius: 99px; background: transparent; font-size: 14px; }
+    .login-box input { width: 100%; padding: 7px 14px; border: 1px solid #dfe1e5; border-radius: 99px; background: transparent; font-size: 14px; }
     input::placeholder { color: #a9aeb6; }
     input:focus { outline: 2px solid #2866a9; outline-offset: 0; }
     .login-box button { width: 100%; margin-top: 16px; padding: 12px; border: 0; border-radius: 10px; background: #2866a9; color: white; font-weight: bold; font-size: 14px; }
@@ -141,14 +141,12 @@
           <p class="welcome">Chào mừng sinh viên</p>
           <p class="hint">Vui lòng đăng nhập để tiếp tục</p>
 
-          <label for="student">Chọn tài khoản mẫu</label>
-          <select id="student">
-            <option>SV01</option><option>SV02</option><option>SV03</option><option>SV04</option>
-          </select>
+          <label for="student">Mã sinh viên</label>
+          <input id="student" autocomplete="username" placeholder="Ví dụ: SV01" required>
 
           <label for="password">Mật khẩu</label>
           <input id="password" type="password" autocomplete="off" placeholder="Nhập mật khẩu" required>
-          <p class="footnote">Mật khẩu dùng thử: <b>demo1234</b>. Đừng nhập mật khẩu thật của bạn.</p>
+          <p class="footnote">Tài khoản mẫu: <b>SV01</b>–<b>SV04</b> · Mật khẩu: <b>demo1234</b>. Đừng nhập mật khẩu thật của bạn.</p>
 
           <button>ĐĂNG NHẬP</button>
           <p class="message" id="loginMessage" role="alert"></p>

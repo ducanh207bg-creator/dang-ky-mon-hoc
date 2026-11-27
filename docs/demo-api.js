@@ -59,10 +59,11 @@ function overlaps(a, b) {
 // Cùng tên và cách dùng với hàm gọi máy chủ trong bản thật
 async function api(url, body) {
   if (url === '/api/login') {
-    if (!STUDENTS[body.student] || body.password !== DEMO_PASSWORD) {
+    const id = (body.student || '').trim().toUpperCase();
+    if (!STUDENTS[id] || body.password !== DEMO_PASSWORD) {
       throw new Error('Sai mã sinh viên hoặc mật khẩu.');
     }
-    return { token: body.student, name: STUDENTS[body.student] };
+    return { token: id, name: STUDENTS[id] };
   }
   if (url === '/api/logout') return {};
 
