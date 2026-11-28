@@ -101,6 +101,39 @@
     .total { margin-top: 8px; padding-top: 12px; border-top: 1px solid #eceef2; font-size: 13px; font-weight: 600; }
     #refresh { width: 100%; margin-top: 12px; }
     footer { margin-top: 14px; text-align: center; font-size: 11px; color: #6b7280; }
+
+    /* Hai tab và thời khóa biểu */
+    .views { display: flex; gap: 8px; margin-top: 16px; padding: 4px; border-radius: 12px; background: #eef2f9; }
+    .views button { flex: 1; padding: 9px; border: 0; border-radius: 9px; background: transparent; color: #102a4f; font-weight: 600; font-size: 14px; }
+    .views button.active { background: #102a4f; color: white; }
+    .note { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: #e8f2fd; color: #102a4f; font-size: 13px; }
+    .timetable-wrap { overflow-x: auto; }
+    #timetable { display: grid; grid-template-columns: 90px repeat(6, minmax(0, 1fr)); gap: 6px; min-width: 860px; }
+    .day, .period { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; font-size: 13px; font-weight: bold; text-align: center; }
+    .day { padding: 12px 4px; background: #102a4f; color: white; }
+    .day.corner, .period { background: #e8f2fd; color: #102a4f; }
+    .period span { color: #6b7280; font-size: 11px; font-weight: normal; }
+    .slot { min-height: 130px; padding: 5px; border: 1px dashed #d5e0f0; border-radius: 10px; background: #fbfdff; }
+    .lesson { padding: 9px; border-radius: 9px; color: white; font-size: 12px; overflow-wrap: anywhere; }
+    .lesson + .lesson { margin-top: 5px; }
+    .lesson strong, .lesson span { display: block; }
+    .lesson strong { margin-bottom: 4px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px; font-size: 12px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; }
+
+    /* Khi in chỉ in thời khóa biểu */
+    @media print {
+      @page { size: A4 landscape; margin: 10mm; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      body { background: white; }
+      #app { min-height: 0; padding: 0; }
+      #app .card { max-width: none; border: 0; }
+      #app .banner, #app .content > .row, .views, .note, #print, footer { display: none !important; }
+      .content { padding: 0; }
+      .timetable-wrap { overflow: visible; }
+      #timetable { min-width: 0; }
+      .slot { min-height: 110px; }
+    }
   </style>
 </head>
 <body>
@@ -179,6 +212,12 @@
           <button class="outline" id="logout">Đăng xuất</button>
         </div>
 
+        <div class="views" id="views">
+          <button type="button" data-view="courses" class="active">Đăng ký môn học</button>
+          <button type="button" data-view="timetable">Thời khóa biểu</button>
+        </div>
+
+        <div id="coursesView">
         <div class="stats">
           <div><span class="small">Tín chỉ đã đăng ký</span><strong id="credits">–</strong></div>
           <div><span class="small">Số môn đã chọn</span><strong id="chosen">–</strong></div>
@@ -218,6 +257,21 @@
           <div id="myCourses"></div>
           <div class="row total"><span>Tổng số tín chỉ</span><span id="total">–</span></div>
           <button class="outline" id="refresh">Làm mới danh sách đăng ký</button>
+        </div>
+
+        </div>
+
+        <div id="timetableView" hidden>
+          <div class="row section">
+            <div>
+              <h2 class="section-title">Thời khóa biểu</h2>
+              <p class="small">Học kỳ 1 · Năm học 2026–2027<span id="printName"></span></p>
+            </div>
+            <button type="button" class="outline" id="print">In thời khóa biểu</button>
+          </div>
+          <p class="note">ⓘ Lịch học được kiểm tra khi đăng ký, nên các môn trùng lịch không thể cùng xuất hiện trong thời khóa biểu của bạn.</p>
+          <div class="timetable-wrap"><div id="timetable"></div></div>
+          <div class="legend" id="legend"></div>
         </div>
 
         <footer>PHENIKAA UNIVERSITY · COURSE REGISTRATION SYSTEM</footer>
@@ -262,6 +316,9 @@
       $('search').value = '';
       $('password').value = '';
       setFilter('all');
+      showView('courses');
+      $('timetable').replaceChildren();
+      $('legend').replaceChildren();
     }
 
     function showApp() {
@@ -381,6 +438,7 @@
     // Thông tin sinh viên, tiến độ tín chỉ và danh sách môn đã đăng ký
     function renderSummary() {
       const mine = state.courses.filter(course => course.registered);
+      renderTimetable(mine);
       const max = state.student.max_credits;
       const percent = Math.min(100, Math.round(state.credits / max * 100));
 
@@ -406,6 +464,66 @@
         return row;
       }));
       if (!mine.length) $('myCourses').append(create('p', 'empty', 'Bạn chưa đăng ký môn nào.'));
+    }
+
+    // Thời khóa biểu: cột là thứ, hàng là buổi, mỗi môn đã đăng ký là một ô màu
+    const DAYS = [['Thứ 2', 'Thứ Hai'], ['Thứ 3', 'Thứ Ba'], ['Thứ 4', 'Thứ Tư'],
+      ['Thứ 5', 'Thứ Năm'], ['Thứ 6', 'Thứ Sáu'], ['Thứ 7', 'Thứ Bảy']];
+    const PERIODS = [
+      { name: 'Buổi sáng', hours: 'trước 12:00', has: start => start < '12:00' },
+      { name: 'Buổi chiều', hours: 'từ 12:00', has: start => start >= '12:00' }
+    ];
+    const COLORS = ['#102a4f', '#be185d', '#0f766e', '#b45309', '#6d28d9', '#1d4ed8', '#15803d', '#b91c1c'];
+
+    function renderTimetable(mine) {
+      const lessons = mine.map((course, index) => {
+        const split = course.schedule.lastIndexOf(' ');
+        const time = course.schedule.slice(split + 1);
+        return { course, time, day: course.schedule.slice(0, split), start: time.slice(0, 5),
+          color: COLORS[index % COLORS.length] };
+      });
+
+      const cells = [create('div', 'day corner', 'Buổi'), ...DAYS.map(day => create('div', 'day', day[1]))];
+      for (const period of PERIODS) {
+        const title = create('div', 'period', period.name);
+        title.append(create('span', '', period.hours));
+        cells.push(title);
+
+        for (const [day] of DAYS) {
+          const slot = create('div', 'slot');
+          lessons.filter(lesson => lesson.day === day && period.has(lesson.start))
+            .sort((a, b) => a.start.localeCompare(b.start))
+            .forEach(({ course, time, color }) => {
+              const box = create('div', 'lesson');
+              box.style.background = color;
+              box.append(create('strong', '', `${course.id} · ${course.name}`),
+                create('span', '', time), create('span', '', 'Phòng ' + course.room),
+                create('span', '', 'GV: ' + course.lecturer));
+              slot.append(box);
+            });
+          cells.push(slot);
+        }
+      }
+      $('timetable').replaceChildren(...cells);
+
+      $('legend').replaceChildren(...lessons.map(({ course, color }) => {
+        const dot = create('i');
+        dot.style.background = color;
+        const item = create('span');
+        item.append(dot, `${course.id} – ${course.name}`);
+        return item;
+      }));
+      if (!lessons.length) $('legend').append(create('span', 'small', 'Bạn chưa đăng ký môn nào.'));
+      // Tên sinh viên cần có trên bản in vì phần lời chào không được in
+      $('printName').textContent = ` · ${state.student.name} (${state.student.id})`;
+    }
+
+    function showView(view) {
+      $('coursesView').hidden = view !== 'courses';
+      $('timetableView').hidden = view !== 'timetable';
+      for (const button of $('views').children) {
+        button.classList.toggle('active', button.dataset.view === view);
+      }
     }
 
     async function loadCourses() {
@@ -468,6 +586,12 @@
       setFilter(event.target.dataset.filter);
       renderCourses();
     };
+
+    $('views').onclick = event => {
+      if (event.target.dataset.view) showView(event.target.dataset.view);
+    };
+
+    $('print').onclick = () => window.print();
 
     $('refresh').onclick = async () => {
       if (await loadCourses()) showMessage('✓ Đã làm mới danh sách.', true);

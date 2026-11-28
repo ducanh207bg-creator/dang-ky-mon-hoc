@@ -68,6 +68,8 @@ public class SwingApp extends JFrame {
     };
     private final JTable table = new JTable(model);
 
+    private final TimetablePanel timetable = new TimetablePanel();
+
     private State state;
     private final List<Course> shown = new ArrayList<>(); // các môn đang hiện trong bảng
 
@@ -84,13 +86,16 @@ public class SwingApp extends JFrame {
         top.add(createSummary(), BorderLayout.CENTER);
 
         JPanel body = new JPanel(new BorderLayout(14, 0));
-        body.setBorder(BorderFactory.createEmptyBorder(8, 16, 14, 16));
+        body.setBorder(BorderFactory.createEmptyBorder(8, 12, 10, 12));
         body.add(createCourseList(), BorderLayout.CENTER);
         body.add(createMyCourses(), BorderLayout.EAST);
 
         JPanel content = new JPanel(new BorderLayout());
         content.add(top, BorderLayout.NORTH);
-        content.add(body, BorderLayout.CENTER);
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.addTab("Đăng ký môn học", body);
+        tabs.addTab("Thời khóa biểu", timetable);
+        content.add(tabs, BorderLayout.CENTER);
         setContentPane(content);
     }
 
@@ -383,13 +388,15 @@ public class SwingApp extends JFrame {
         progress.setValue(percent);
 
         myCourses.removeAll();
-        int count = 0;
+        List<Course> registered = new ArrayList<>();
         for (Course course : state.courses) {
             if (course.registered) {
                 myCourses.add(myCourseRow(course));
-                count++;
+                registered.add(course);
             }
         }
+        timetable.showCourses(state.student.name, registered);
+        int count = registered.size();
         if (count == 0) {
             myCourses.add(label("  Bạn chưa đăng ký môn nào.", Font.PLAIN, 12, GRAY));
         }
@@ -517,7 +524,7 @@ public class SwingApp extends JFrame {
             // Dùng Segoe UI để dấu tiếng Việt hiển thị rõ
             Font font = new Font("Segoe UI", Font.PLAIN, 13);
             for (String name : new String[] {"Label", "Button", "ToggleButton", "CheckBox", "TextField",
-                    "PasswordField", "Table", "TableHeader"}) {
+                    "PasswordField", "Table", "TableHeader", "TabbedPane"}) {
                 UIManager.put(name + ".font", new FontUIResource(font));
             }
             UIManager.put("OptionPane.messageFont", new FontUIResource(font));
