@@ -113,7 +113,7 @@
     .day { padding: 12px 4px; background: #102a4f; color: white; }
     .day.corner, .period { background: #e8f2fd; color: #102a4f; }
     .period span { color: #6b7280; font-size: 11px; font-weight: normal; }
-    .slot { min-height: 130px; padding: 5px; border: 1px dashed #d5e0f0; border-radius: 10px; background: #fbfdff; }
+    .slot { min-height: 96px; padding: 5px; border: 1px dashed #d5e0f0; border-radius: 10px; background: #fbfdff; }
     .lesson { padding: 9px; border-radius: 9px; color: white; font-size: 12px; overflow-wrap: anywhere; }
     .lesson + .lesson { margin-top: 5px; }
     .lesson strong, .lesson span { display: block; }
@@ -132,7 +132,8 @@
       .content { padding: 0; }
       .timetable-wrap { overflow: visible; }
       #timetable { min-width: 0; }
-      .slot { min-height: 110px; }
+      .slot { min-height: 60px; }
+      .lesson { padding: 4px; font-size: 10px; }
     }
   </style>
 </head>
@@ -466,32 +467,32 @@
       if (!mine.length) $('myCourses').append(create('p', 'empty', 'Bạn chưa đăng ký môn nào.'));
     }
 
-    // Thời khóa biểu: cột là thứ, hàng là buổi, mỗi môn đã đăng ký là một ô màu
+    // Thời khóa biểu: cột là thứ, hàng là tiết, môn học hiện ở mọi tiết trùng giờ học
     const DAYS = [['Thứ 2', 'Thứ Hai'], ['Thứ 3', 'Thứ Ba'], ['Thứ 4', 'Thứ Tư'],
       ['Thứ 5', 'Thứ Năm'], ['Thứ 6', 'Thứ Sáu'], ['Thứ 7', 'Thứ Bảy']];
     const PERIODS = [
-      { name: 'Buổi sáng', hours: 'trước 12:00', has: start => start < '12:00' },
-      { name: 'Buổi chiều', hours: 'từ 12:00', has: start => start >= '12:00' }
-    ];
+      ['07:00', '08:30'], ['08:45', '10:15'], ['10:30', '12:00'],
+      ['13:00', '14:30'], ['14:45', '16:15'], ['16:30', '18:00']
+    ].map(([start, end], index) => ({ name: 'Tiết ' + (index + 1), start, end }));
     const COLORS = ['#102a4f', '#be185d', '#0f766e', '#b45309', '#6d28d9', '#1d4ed8', '#15803d', '#b91c1c'];
 
     function renderTimetable(mine) {
       const lessons = mine.map((course, index) => {
         const split = course.schedule.lastIndexOf(' ');
         const time = course.schedule.slice(split + 1);
-        return { course, time, day: course.schedule.slice(0, split), start: time.slice(0, 5),
+        return { course, time, day: course.schedule.slice(0, split), start: time.slice(0, 5), end: time.slice(-5),
           color: COLORS[index % COLORS.length] };
       });
 
-      const cells = [create('div', 'day corner', 'Buổi'), ...DAYS.map(day => create('div', 'day', day[1]))];
+      const cells = [create('div', 'day corner', 'Tiết'), ...DAYS.map(day => create('div', 'day', day[1]))];
       for (const period of PERIODS) {
         const title = create('div', 'period', period.name);
-        title.append(create('span', '', period.hours));
+        title.append(create('span', '', `${period.start}–${period.end}`));
         cells.push(title);
 
         for (const [day] of DAYS) {
           const slot = create('div', 'slot');
-          lessons.filter(lesson => lesson.day === day && period.has(lesson.start))
+          lessons.filter(lesson => lesson.day === day && lesson.start < period.end && lesson.end > period.start)
             .sort((a, b) => a.start.localeCompare(b.start))
             .forEach(({ course, time, color }) => {
               const box = create('div', 'lesson');

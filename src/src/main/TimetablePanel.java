@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import javax.swing.*;
 
-// Thời khóa biểu: cột là thứ, hàng là buổi, mỗi môn đã đăng ký là một ô màu
+// Thời khóa biểu: cột là thứ, hàng là tiết, môn học hiện ở mọi tiết trùng giờ học
 class TimetablePanel extends JPanel {
     private static final Color NAVY = new Color(0x102A4F);
     private static final Color LIGHT = new Color(0xE8F2FD);
@@ -20,6 +20,10 @@ class TimetablePanel extends JPanel {
             new Color(0xB91C1C)};
     private static final String[] DAYS = {"Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
     private static final String[] DAY_NAMES = {"Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
+
+    // Giờ bắt đầu và kết thúc của từng tiết
+    private static final String[][] PERIODS = {{"07:00", "08:30"}, {"08:45", "10:15"}, {"10:30", "12:00"},
+            {"13:00", "14:30"}, {"14:45", "16:15"}, {"16:30", "18:00"}};
 
     private final JPanel sheet = new JPanel(new BorderLayout(0, 8)); // phần được in
     private final JLabel lblTitle = label("Thời khóa biểu · Học kỳ 1 · Năm học 2026–2027", Font.BOLD, 14, NAVY);
@@ -51,30 +55,34 @@ class TimetablePanel extends JPanel {
         lblTitle.setText("Thời khóa biểu · " + studentName + " · Học kỳ 1 · Năm học 2026–2027");
         grid.removeAll();
 
-        addCell(headerCell("Buổi", LIGHT, NAVY), 0, 0, 0);
+        addCell(headerCell("Tiết", LIGHT, NAVY), 0, 0, 0);
         for (int i = 0; i < DAY_NAMES.length; i++) {
             addCell(headerCell(DAY_NAMES[i], NAVY, Color.WHITE), i + 1, 0, 0);
         }
 
-        String[] periods = {"Buổi sáng", "Buổi chiều"};
-        for (int row = 0; row < periods.length; row++) {
-            addCell(headerCell(periods[row], LIGHT, NAVY), 0, row + 1, 1);
+        for (int row = 0; row < PERIODS.length; row++) {
+            String start = PERIODS[row][0];
+            String end = PERIODS[row][1];
+            String title = "<html><center>Tiết " + (row + 1) + "<br>" + start + "–" + end + "</center></html>";
+            addCell(headerCell(title, LIGHT, NAVY), 0, row + 1, 1);
             for (int day = 0; day < DAYS.length; day++) {
-                addCell(slot(registered, DAYS[day], row == 0), day + 1, row + 1, 1);
+                addCell(slot(registered, DAYS[day], start, end), day + 1, row + 1, 1);
             }
         }
         grid.revalidate();
         grid.repaint();
     }
 
-    // Một ô của lưới: các môn học vào thứ này, trong buổi sáng hoặc buổi chiều
-    private JPanel slot(List<SwingApp.Course> registered, String day, boolean morning) {
+    // Một ô của lưới: các môn học vào thứ này có giờ trùng với tiết này
+    private JPanel slot(List<SwingApp.Course> registered, String day, String start, String end) {
         List<SwingApp.Course> lessons = new ArrayList<>();
         for (SwingApp.Course course : registered) {
             // Lịch có dạng "Thứ 2 08:00–10:00"
             int split = course.schedule.lastIndexOf(' ');
-            boolean startsInMorning = course.schedule.substring(split + 1).compareTo("12:00") < 0;
-            if (course.schedule.substring(0, split).equals(day) && startsInMorning == morning) {
+            String time = course.schedule.substring(split + 1);
+            boolean inPeriod = time.substring(0, 5).compareTo(end) < 0
+                    && time.substring(time.length() - 5).compareTo(start) > 0;
+            if (course.schedule.substring(0, split).equals(day) && inPeriod) {
                 lessons.add(course);
             }
         }
@@ -120,7 +128,7 @@ class TimetablePanel extends JPanel {
         c.insets = new Insets(2, 2, 2, 2);
         // Các cột thứ rộng bằng nhau, dù ô có môn hay không
         if (column > 0) cell.setPreferredSize(new Dimension(130,
-                row == 0 ? cell.getPreferredSize().height : Math.max(110, cell.getPreferredSize().height)));
+                row == 0 ? cell.getPreferredSize().height : Math.max(86, cell.getPreferredSize().height)));
         grid.add(cell, c);
     }
 
