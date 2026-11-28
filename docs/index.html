@@ -108,16 +108,19 @@
     .views button.active { background: #102a4f; color: white; }
     .note { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: #e8f2fd; color: #102a4f; font-size: 13px; }
     .timetable-wrap { overflow-x: auto; }
-    #timetable { display: grid; grid-template-columns: 90px repeat(6, minmax(0, 1fr)); gap: 6px; min-width: 860px; }
-    .day, .period { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; font-size: 13px; font-weight: bold; text-align: center; }
-    .day { padding: 12px 4px; background: #102a4f; color: white; }
-    .day.corner, .period { background: #e8f2fd; color: #102a4f; }
-    .period span { color: #6b7280; font-size: 11px; font-weight: normal; }
-    .slot { min-height: 96px; padding: 5px; border: 1px dashed #d5e0f0; border-radius: 10px; background: #fbfdff; }
-    .lesson { padding: 9px; border-radius: 9px; color: white; font-size: 12px; overflow-wrap: anywhere; }
-    .lesson + .lesson { margin-top: 5px; }
-    .lesson strong, .lesson span { display: block; }
-    .lesson strong { margin-bottom: 4px; }
+    #timetable { display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); min-width: 980px; }
+    .corner, .day { height: 48px; padding: 6px; border-bottom: 1px solid #374151; font-size: 12px; color: #4b5563; }
+    .day { border-left: 1px solid #e5e7eb; font-size: 14px; font-weight: 600; align-content: center; }
+    .hours, .day-column { position: relative; }
+    .hours span { position: absolute; right: 8px; transform: translateY(-50%); font-size: 12px; font-weight: 600; }
+    .day-column { border-left: 1px solid #e5e7eb; }
+
+    /* Khối môn học: đặt đúng vị trí theo giờ bắt đầu và giờ kết thúc */
+    .lesson { position: absolute; left: 2px; right: 2px; overflow: hidden; border-radius: 9px; background: white; box-shadow: 0 1px 5px rgba(0, 0, 0, .18); font-size: 12px; overflow-wrap: anywhere; }
+    .lesson-head { padding: 6px 8px; color: white; }
+    .lesson-head strong, .lesson-head span, .lesson-body span { display: block; }
+    .lesson-head span { font-size: 11px; opacity: .85; }
+    .lesson-body { padding: 6px 8px; line-height: 1.4; }
     .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px; font-size: 12px; }
     .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; }
 
@@ -131,9 +134,7 @@
       #app .banner, #app .content > .row, .views, .note, #print, footer { display: none !important; }
       .content { padding: 0; }
       .timetable-wrap { overflow: visible; }
-      #timetable { min-width: 0; }
-      .slot { min-height: 60px; }
-      .lesson { padding: 4px; font-size: 10px; }
+      #timetable { min-width: 0; zoom: .7; }
     }
   </style>
 </head>
@@ -444,43 +445,67 @@
       if (!mine.length) $('myCourses').append(create('p', 'empty', 'Bạn chưa đăng ký môn nào.'));
     }
 
-    // Thời khóa biểu: cột là thứ, hàng là tiết, môn học hiện ở mọi tiết trùng giờ học
-    const DAYS = [['Thứ 2', 'Thứ Hai'], ['Thứ 3', 'Thứ Ba'], ['Thứ 4', 'Thứ Tư'],
-      ['Thứ 5', 'Thứ Năm'], ['Thứ 6', 'Thứ Sáu'], ['Thứ 7', 'Thứ Bảy']];
-    const PERIODS = [
-      ['07:00', '08:30'], ['08:45', '10:15'], ['10:30', '12:00'],
-      ['13:00', '14:30'], ['14:45', '16:15'], ['16:30', '18:00']
-    ].map(([start, end], index) => ({ name: 'Tiết ' + (index + 1), start, end }));
-    const COLORS = ['#102a4f', '#be185d', '#0f766e', '#b45309', '#6d28d9', '#1d4ed8', '#15803d', '#b91c1c'];
+    // Thời khóa biểu dạng lịch: cột là thứ, trục dọc là giờ
+    const DAYS = [['Thứ 2', 'Thứ 2'], ['Thứ 3', 'Thứ 3'], ['Thứ 4', 'Thứ 4'], ['Thứ 5', 'Thứ 5'],
+      ['Thứ 6', 'Thứ 6'], ['Thứ 7', 'Thứ 7'], ['Chủ nhật', 'Chủ nhật']];
+    // Mỗi ca gồm 3 tiết, tra theo giờ bắt đầu
+    const PERIODS = { '06:45': '1-3', '09:30': '4-6', '13:00': '7-9', '15:45': '10-12' };
+    const COLORS = ['#223671', '#ea4c00', '#3b5296', '#5878d8', '#0f766e', '#be185d', '#6d28d9', '#15803d'];
+    const FIRST_HOUR = 6;
+    const LAST_HOUR = 19;
+    const PIXELS_PER_MINUTE = 1.1;
+
+    // Vị trí theo chiều dọc của một mốc giờ dạng "09:30"
+    function position(time) {
+      const [hour, minute] = time.split(':').map(Number);
+      return ((hour - FIRST_HOUR) * 60 + minute) * PIXELS_PER_MINUTE;
+    }
 
     function renderTimetable(mine) {
       const lessons = mine.map((course, index) => {
         const split = course.schedule.lastIndexOf(' ');
-        const time = course.schedule.slice(split + 1);
-        return { course, time, day: course.schedule.slice(0, split), start: time.slice(0, 5), end: time.slice(-5),
-          color: COLORS[index % COLORS.length] };
+        const [start, end] = course.schedule.slice(split + 1).split('–');
+        return { course, start, end, day: course.schedule.slice(0, split), color: COLORS[index % COLORS.length] };
       });
 
-      const cells = [create('div', 'day corner', 'Tiết'), ...DAYS.map(day => create('div', 'day', day[1]))];
-      for (const period of PERIODS) {
-        const title = create('div', 'period', period.name);
-        title.append(create('span', '', `${period.start}–${period.end}`));
-        cells.push(title);
+      const hourHeight = 60 * PIXELS_PER_MINUTE;
+      const height = (LAST_HOUR - FIRST_HOUR) * hourHeight + 'px';
+      const cells = [create('div', 'corner', 'Giờ VN'), ...DAYS.map(day => create('div', 'day', day[1]))];
 
-        for (const [day] of DAYS) {
-          const slot = create('div', 'slot');
-          lessons.filter(lesson => lesson.day === day && lesson.start < period.end && lesson.end > period.start)
-            .sort((a, b) => a.start.localeCompare(b.start))
-            .forEach(({ course, time, color }) => {
-              const box = create('div', 'lesson');
-              box.style.background = color;
-              box.append(create('strong', '', `${course.id} · ${course.name}`),
-                create('span', '', time), create('span', '', 'Phòng ' + course.room),
-                create('span', '', 'GV: ' + course.lecturer));
-              slot.append(box);
-            });
-          cells.push(slot);
+      const hours = create('div', 'hours');
+      hours.style.height = height;
+      for (let hour = FIRST_HOUR + 1; hour < LAST_HOUR; hour++) {
+        const label = create('span', '', hour + ':00');
+        label.style.top = (hour - FIRST_HOUR) * hourHeight + 'px';
+        hours.append(label);
+      }
+      cells.push(hours);
+
+      for (const [day] of DAYS) {
+        const column = create('div', 'day-column');
+        column.style.height = height;
+        // Đường kẻ ngang mỗi giờ
+        column.style.background = `repeating-linear-gradient(transparent 0 ${hourHeight - 1}px, #e5e7eb ${hourHeight - 1}px ${hourHeight}px)`;
+
+        for (const { course, start, end, color } of lessons.filter(lesson => lesson.day === day)) {
+          const box = create('div', 'lesson');
+          box.style.top = position(start) + 'px';
+          box.style.height = position(end) - position(start) + 'px';
+
+          const head = create('div', 'lesson-head');
+          head.style.background = color;
+          const period = PERIODS[start] ? ` (Tiết ${PERIODS[start]})` : '';
+          head.append(create('strong', '', course.name), create('span', '', `${start} - ${end}${period}`));
+
+          const body = create('div', 'lesson-body');
+          body.append(create('span', '', `${course.id} · ${course.credits} tín chỉ`),
+            create('span', '', course.room), create('span', '', course.lecturer));
+
+          box.append(head, body);
+          box.title = `${course.id} – ${course.name}`;
+          column.append(box);
         }
+        cells.push(column);
       }
       $('timetable').replaceChildren(...cells);
 

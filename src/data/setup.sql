@@ -14,18 +14,19 @@ INSERT OR IGNORE INTO credentials VALUES
 ('SV02','YuuYfAIqybYBKV6O7LmYpg==','flgxv9WZSfrHnVIOG3jk0pjW3ZXzuGS/WavqT59ZBc8='),
 ('SV03','cJJ3jkNxvW69nCuFDs71Rg==','CoTHkI7UQfcV52D2TVttF6BTbcXgbHBlI4UYeOBWYF4='),
 ('SV04','KXIaPhUonm+LKyYqb6E0Ng==','RKcs788FEwzp2DMPR8SdJ7djP2EPVA8NHvjYmNzdk7w=');
-INSERT OR IGNORE INTO courses VALUES
-('IT101','Lập trình Java',3,'Nguyễn An',20,2,'08:00','10:00'),
-('IT102','Cơ sở dữ liệu',3,'Trần Bình',20,2,'09:00','11:00'),
-('MA101','Toán rời rạc',3,'Lê Chi',20,3,'08:00','10:00'),
-('EN101','Tiếng Anh',2,'Phạm Dung',1,4,'08:00','10:00'),
-('IT103','Mạng máy tính',3,'Vũ Hà',20,5,'08:00','10:00'),
-('IT104','Trí tuệ nhân tạo',3,'Phạm Văn Dũng',20,4,'13:00','15:30'),
-('IT105','Cấu trúc dữ liệu và giải thuật',3,'Hoàng Mai',20,6,'08:00','10:00'),
-('IT106','Hệ điều hành',3,'Đỗ Quân',20,2,'13:00','15:00'),
-('IT107','Công nghệ phần mềm',3,'Bùi Lan',20,3,'13:00','15:00'),
-('MA102','Xác suất thống kê',3,'Ngô Hải',20,5,'13:00','15:00'),
-('PH101','Vật lý đại cương',2,'Đặng Sơn',20,7,'08:00','10:00');
+INSERT INTO courses VALUES
+('IT101','Lập trình Java',3,'Nguyễn An',20,2,'09:30','12:10'),
+('IT102','Cơ sở dữ liệu',3,'Trần Bình',20,2,'09:30','12:10'),
+('MA101','Toán rời rạc',3,'Lê Chi',20,3,'09:30','12:10'),
+('EN101','Tiếng Anh',2,'Phạm Dung',1,4,'06:45','09:25'),
+('IT103','Mạng máy tính',3,'Vũ Hà',20,5,'09:30','12:10'),
+('IT104','Trí tuệ nhân tạo',3,'Phạm Văn Dũng',20,4,'13:00','15:40'),
+('IT105','Cấu trúc dữ liệu và giải thuật',3,'Hoàng Mai',20,6,'13:00','15:40'),
+('IT106','Hệ điều hành',3,'Đỗ Quân',20,2,'13:00','15:40'),
+('IT107','Công nghệ phần mềm',3,'Bùi Lan',20,3,'13:00','15:40'),
+('MA102','Xác suất thống kê',3,'Ngô Hải',20,6,'15:45','18:25'),
+('PH101','Vật lý đại cương',2,'Đặng Sơn',20,8,'09:30','12:10')
+ON CONFLICT(id) DO UPDATE SET day = excluded.day, start = excluded.start, end = excluded.end;
 -- Phòng học để ở bảng riêng nên cơ sở dữ liệu cũ không cần sửa bảng courses
 CREATE TABLE IF NOT EXISTS course_rooms (course_id TEXT PRIMARY KEY REFERENCES courses(id), room TEXT NOT NULL);
 INSERT OR IGNORE INTO course_rooms VALUES

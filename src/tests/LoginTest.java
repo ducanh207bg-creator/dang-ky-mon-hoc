@@ -54,6 +54,7 @@ public class LoginTest {
                 state.contains(names[0]) && !state.contains(names[1]));
         check("old registration is kept after name update", state.contains("\"credits\":3"));
         check("courses include a room", state.contains("\"room\":\"P.301\""));
+        check("a Sunday class shows as Sunday", state.contains("Chủ nhật 09:30–12:10"));
         check("old 6-credit limit is raised to 18", state.contains("\"max_credits\":18"));
         check("there are 11 courses, each with a room",
                 state.split("\"room\":\"P\\.", -1).length - 1 == 11);

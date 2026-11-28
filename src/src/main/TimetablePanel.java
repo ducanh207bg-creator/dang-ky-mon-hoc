@@ -5,29 +5,16 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import javax.swing.*;
 
-// Thời khóa biểu: cột là thứ, hàng là tiết, môn học hiện ở mọi tiết trùng giờ học
+// Tab thời khóa biểu: dòng ghi chú, nút in và lịch tuần (CalendarGrid)
 class TimetablePanel extends JPanel {
     private static final Color NAVY = new Color(0x102A4F);
-    private static final Color LIGHT = new Color(0xE8F2FD);
-    private static final Color LINE = new Color(0xD5E0F0);
-    private static final Color[] COLORS = {NAVY, new Color(0xBE185D), new Color(0x0F766E),
-            new Color(0xB45309), new Color(0x6D28D9), new Color(0x1D4ED8), new Color(0x15803D),
-            new Color(0xB91C1C)};
-    private static final String[] DAYS = {"Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"};
-    private static final String[] DAY_NAMES = {"Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
-
-    // Giờ bắt đầu và kết thúc của từng tiết
-    private static final String[][] PERIODS = {{"07:00", "08:30"}, {"08:45", "10:15"}, {"10:30", "12:00"},
-            {"13:00", "14:30"}, {"14:45", "16:15"}, {"16:30", "18:00"}};
 
     private final JPanel sheet = new JPanel(new BorderLayout(0, 8)); // phần được in
     private final JLabel lblTitle = label("Thời khóa biểu · Học kỳ 1 · Năm học 2026–2027", Font.BOLD, 14, NAVY);
-    private final JPanel grid = new JPanel(new GridBagLayout());
+    private final CalendarGrid grid = new CalendarGrid();
 
     TimetablePanel() {
         super(new BorderLayout(0, 8));
@@ -40,96 +27,21 @@ class TimetablePanel extends JPanel {
                 BorderLayout.CENTER);
         top.add(btnPrint, BorderLayout.EAST);
 
-        grid.setBackground(Color.WHITE);
         sheet.setBackground(Color.WHITE);
         sheet.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         sheet.add(lblTitle, BorderLayout.NORTH);
         sheet.add(grid, BorderLayout.CENTER);
 
         add(top, BorderLayout.NORTH);
-        add(new JScrollPane(sheet), BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(sheet);
+        scroll.getVerticalScrollBar().setUnitIncrement(24);
+        add(scroll, BorderLayout.CENTER);
     }
 
-    // Vẽ lại lưới theo danh sách môn đã đăng ký
+    // Vẽ lại lịch theo danh sách môn đã đăng ký
     void showCourses(String studentName, List<SwingApp.Course> registered) {
         lblTitle.setText("Thời khóa biểu · " + studentName + " · Học kỳ 1 · Năm học 2026–2027");
-        grid.removeAll();
-
-        addCell(headerCell("Tiết", LIGHT, NAVY), 0, 0, 0);
-        for (int i = 0; i < DAY_NAMES.length; i++) {
-            addCell(headerCell(DAY_NAMES[i], NAVY, Color.WHITE), i + 1, 0, 0);
-        }
-
-        for (int row = 0; row < PERIODS.length; row++) {
-            String start = PERIODS[row][0];
-            String end = PERIODS[row][1];
-            String title = "<html><center>Tiết " + (row + 1) + "<br>" + start + "–" + end + "</center></html>";
-            addCell(headerCell(title, LIGHT, NAVY), 0, row + 1, 1);
-            for (int day = 0; day < DAYS.length; day++) {
-                addCell(slot(registered, DAYS[day], start, end), day + 1, row + 1, 1);
-            }
-        }
-        grid.revalidate();
-        grid.repaint();
-    }
-
-    // Một ô của lưới: các môn học vào thứ này có giờ trùng với tiết này
-    private JPanel slot(List<SwingApp.Course> registered, String day, String start, String end) {
-        List<SwingApp.Course> lessons = new ArrayList<>();
-        for (SwingApp.Course course : registered) {
-            // Lịch có dạng "Thứ 2 08:00–10:00"
-            int split = course.schedule.lastIndexOf(' ');
-            String time = course.schedule.substring(split + 1);
-            boolean inPeriod = time.substring(0, 5).compareTo(end) < 0
-                    && time.substring(time.length() - 5).compareTo(start) > 0;
-            if (course.schedule.substring(0, split).equals(day) && inPeriod) {
-                lessons.add(course);
-            }
-        }
-        lessons.sort(Comparator.comparing(course -> course.schedule));
-
-        JPanel slot = new JPanel();
-        slot.setLayout(new BoxLayout(slot, BoxLayout.Y_AXIS));
-        slot.setBackground(new Color(0xFBFDFF));
-        slot.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(LINE),
-                BorderFactory.createEmptyBorder(4, 4, 4, 4)));
-        for (SwingApp.Course course : lessons) {
-            JLabel box = label("<html><body style='width:95px'><b>" + course.id + " · " + course.name
-                    + "</b><br>" + course.schedule.substring(course.schedule.lastIndexOf(' ') + 1)
-                    + "<br>Phòng " + course.room + "<br>GV: " + course.lecturer + "</body></html>",
-                    Font.PLAIN, 11, Color.WHITE);
-            box.setOpaque(true);
-            box.setBackground(COLORS[registered.indexOf(course) % COLORS.length]);
-            box.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-            box.setMaximumSize(new Dimension(Integer.MAX_VALUE, box.getPreferredSize().height));
-            box.setAlignmentX(LEFT_ALIGNMENT);
-            slot.add(box);
-            slot.add(Box.createVerticalStrut(4));
-        }
-        return slot;
-    }
-
-    private static JLabel headerCell(String text, Color background, Color foreground) {
-        JLabel label = label(text, Font.BOLD, 12, foreground);
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setOpaque(true);
-        label.setBackground(background);
-        label.setBorder(BorderFactory.createEmptyBorder(9, 4, 9, 4));
-        return label;
-    }
-
-    private void addCell(JComponent cell, int column, int row, double weightY) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = column;
-        c.gridy = row;
-        c.weightx = column == 0 ? 0 : 1;
-        c.weighty = weightY;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new Insets(2, 2, 2, 2);
-        // Các cột thứ rộng bằng nhau, dù ô có môn hay không
-        if (column > 0) cell.setPreferredSize(new Dimension(130,
-                row == 0 ? cell.getPreferredSize().height : Math.max(86, cell.getPreferredSize().height)));
-        grid.add(cell, c);
+        grid.setCourses(registered);
     }
 
     private static JLabel label(String text, int style, int size, Color color) {

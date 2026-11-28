@@ -16,27 +16,27 @@ public class Main {
         Student student = new Student("SV01", "Trần Văn Đức Anh", "CNTT01", "Công nghệ thông tin", 18);
         RegistrationService service = new RegistrationService(Arrays.asList(
                 new Course("IT101", "Lập trình Java", 3, "Nguyễn An", 20,
-                        new Schedule(DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(10, 0))),
+                        new Schedule(DayOfWeek.MONDAY, LocalTime.of(9, 30), LocalTime.of(12, 10))),
                 new Course("IT102", "Cơ sở dữ liệu", 3, "Trần Bình", 20,
-                        new Schedule(DayOfWeek.MONDAY, LocalTime.of(9, 0), LocalTime.of(11, 0))),
+                        new Schedule(DayOfWeek.MONDAY, LocalTime.of(9, 30), LocalTime.of(12, 10))),
                 new Course("MA101", "Toán rời rạc", 3, "Lê Chi", 20,
-                        new Schedule(DayOfWeek.TUESDAY, LocalTime.of(8, 0), LocalTime.of(10, 0))),
+                        new Schedule(DayOfWeek.TUESDAY, LocalTime.of(9, 30), LocalTime.of(12, 10))),
                 new Course("EN101", "Tiếng Anh", 2, "Phạm Dung", 1,
-                        new Schedule(DayOfWeek.WEDNESDAY, LocalTime.of(8, 0), LocalTime.of(10, 0))),
+                        new Schedule(DayOfWeek.WEDNESDAY, LocalTime.of(6, 45), LocalTime.of(9, 25))),
                 new Course("IT103", "Mạng máy tính", 2, "Vũ Hà", 20,
-                        new Schedule(DayOfWeek.THURSDAY, LocalTime.of(8, 0), LocalTime.of(10, 0))),
+                        new Schedule(DayOfWeek.THURSDAY, LocalTime.of(9, 30), LocalTime.of(12, 10))),
                 new Course("IT104", "Trí tuệ nhân tạo", 3, "Phạm Văn Dũng", 20,
-                        new Schedule(DayOfWeek.WEDNESDAY, LocalTime.of(13, 0), LocalTime.of(15, 30))),
+                        new Schedule(DayOfWeek.WEDNESDAY, LocalTime.of(13, 0), LocalTime.of(15, 40))),
                 new Course("IT105", "Cấu trúc dữ liệu và giải thuật", 3, "Hoàng Mai", 20,
-                        new Schedule(DayOfWeek.FRIDAY, LocalTime.of(8, 0), LocalTime.of(10, 0))),
+                        new Schedule(DayOfWeek.FRIDAY, LocalTime.of(13, 0), LocalTime.of(15, 40))),
                 new Course("IT106", "Hệ điều hành", 3, "Đỗ Quân", 20,
-                        new Schedule(DayOfWeek.MONDAY, LocalTime.of(13, 0), LocalTime.of(15, 0))),
+                        new Schedule(DayOfWeek.MONDAY, LocalTime.of(13, 0), LocalTime.of(15, 40))),
                 new Course("IT107", "Công nghệ phần mềm", 3, "Bùi Lan", 20,
-                        new Schedule(DayOfWeek.TUESDAY, LocalTime.of(13, 0), LocalTime.of(15, 0))),
+                        new Schedule(DayOfWeek.TUESDAY, LocalTime.of(13, 0), LocalTime.of(15, 40))),
                 new Course("MA102", "Xác suất thống kê", 3, "Ngô Hải", 20,
-                        new Schedule(DayOfWeek.THURSDAY, LocalTime.of(13, 0), LocalTime.of(15, 0))),
+                        new Schedule(DayOfWeek.FRIDAY, LocalTime.of(15, 45), LocalTime.of(18, 25))),
                 new Course("PH101", "Vật lý đại cương", 2, "Đặng Sơn", 20,
-                        new Schedule(DayOfWeek.SATURDAY, LocalTime.of(8, 0), LocalTime.of(10, 0)))
+                        new Schedule(DayOfWeek.SUNDAY, LocalTime.of(9, 30), LocalTime.of(12, 10)))
         ));
         Student otherStudent = new Student("SV02", "Nguyễn Văn Long", "CNTT01", "Công nghệ thông tin", 18);
         service.register(otherStudent, "EN101");
